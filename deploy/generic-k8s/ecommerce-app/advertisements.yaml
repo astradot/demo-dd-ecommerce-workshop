@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,52 +17,71 @@ spec:
   strategy: {}
   template:
     metadata:
-      creationTimestamp: null
       labels:
         tags.datadoghq.com/env: development
         tags.datadoghq.com/service: advertisements
         app: ecommerce
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+      volumes:
+        - name: apmsocketpath
+          hostPath:
+            path: /var/run/datadog/
       containers:
-      - image: public.ecr.aws/x2b9z2t7/ddtraining/advertisements:latest
-        name: advertisements
-        command: ["ddtrace-run"]
-        args: ["flask", "run", "--port=5002", "--host=0.0.0.0"]
-        env:
-          - name: FLASK_APP
-            value: "ads.py"
-          - name: FLASK_DEBUG
-            value: "1"
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: pw
-                name: db-password
-          - name: POSTGRES_USER
-            value: "user"
-          - name: POSTGRES_HOST
-            value: "db"
-          - name: DD_ENV
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.labels['tags.datadoghq.com/env']
-          - name: DD_SERVICE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.labels['tags.datadoghq.com/service']
-          - name: DD_AGENT_HOST
-            valueFrom:
-              fieldRef:
-                fieldPath: status.hostIP
-          - name: DD_LOGS_INJECTION
-            value: "true"
-          - name: DD_ANALYTICS_ENABLED
-            value: "true"
-          - name: DD_PROFILING_ENABLED
-            value: "true"
-        ports:
-        - containerPort: 5002
-        resources: {}
+        - image: public.ecr.aws/x2b9z2t7/ddtraining/advertisements:latest
+          name: advertisements
+          volumeMounts:
+            - name: apmsocketpath
+              mountPath: /var/run/datadog
+          command: ["ddtrace-run"]
+          args: ["flask", "run", "--port=5002", "--host=0.0.0.0"]
+          env:
+            - name: FLASK_APP
+              value: "ads.py"
+            - name: FLASK_DEBUG
+              value: "1"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: pw
+                  name: db-password
+            - name: POSTGRES_USER
+              value: "user"
+            - name: POSTGRES_HOST
+              value: "db.datadog-demo"
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+            - name: DD_TRACE_AGENT_URL
+              value: unix:///var/run/datadog/apm.socket
+            - name: DD_LOGS_INJECTION
+              value: "true"
+            - name: DD_ANALYTICS_ENABLED
+              value: "true"
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+          ports:
+            - containerPort: 5002
+          resources:
+            requests:
+              cpu: 100m
+              memory: 300Mi
+            limits:
+              cpu: 100m
+              memory: 300Mi
 ---
 apiVersion: v1
 kind: Service
@@ -73,11 +93,10 @@ metadata:
   name: advertisements
 spec:
   ports:
-  - port: 5002
-    protocol: TCP
-    targetPort: 5002
+    - port: 5002
+      protocol: TCP
+      targetPort: 5002
   selector:
     tags.datadoghq.com/service: advertisements
     tags.datadoghq.com/env: development
     app: ecommerce
-status:

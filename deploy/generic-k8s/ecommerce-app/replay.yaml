@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    tags.datadoghq.com/service: traffic-replay
+    app: ecommerce
+    tags.datadoghq.com/env: "development"
+  name: traffic-replay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tags.datadoghq.com/service: traffic-replay
+      tags.datadoghq.com/env: "development"
+      app: ecommerce
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        tags.datadoghq.com/service: traffic-replay
+        tags.datadoghq.com/env: "development"
+        app: ecommerce
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values:
+                      - amd64
+      containers:
+        - env:
+            - name: FRONTEND_HOST
+              value: "frontend.datadog-demo"
+            - name: FRONTEND_PORT
+              value: "80"
+          image: 453834546898.dkr.ecr.us-east-1.amazonaws.com/traffic-replay:1679948071-c89dbd3
+          imagePullPolicy: Always
+          name: ecommerce-traffic-replay
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi

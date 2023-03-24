@@ -187,10 +187,14 @@ diff -urN store-frontend-initial-state/config/environments/production.rb store-f
 diff -urN store-frontend-initial-state/config/initializers/datadog.rb store-frontend-instrumented-fixed/config/initializers/datadog.rb
 --- store-frontend-initial-state/config/initializers/datadog.rb	1969-12-31 19:00:00.000000000 -0500
 +++ store-frontend-instrumented-fixed/config/initializers/datadog.rb	2021-12-07 16:01:54.000000000 -0500
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,10 @@
 +Datadog.configure do |c|
 +  # This will activate auto-instrumentation for Rails
 +  c.use :rails, {'analytics_enabled': true, 'service_name': 'store-frontend', 'cache_service': 'store-frontend-cache', 'database_service': 'store-frontend-sqlite'}
 +  # Make sure requests are also instrumented
 +  c.use :http, {'analytics_enabled': true, 'service_name': 'store-frontend'}
++  c.tracer.transport_options = proc { |t|
++    # Provide local path to trace agent Unix socket
++    t.adapter :unix, '/var/run/datadog/apm.socket'
++  }
 +end

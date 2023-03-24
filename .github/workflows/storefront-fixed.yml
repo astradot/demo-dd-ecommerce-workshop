@@ -1,54 +1,57 @@
+---
 name: Storefront (fixed) Service Test and Build
 
-on:
+"on":
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
       - store-frontend/**
   workflow_dispatch:
-    branches: [ main ]
+    branches: [main]
 
 defaults:
   run:
     working-directory: store-frontend
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+      - uses: benjlevesque/short-sha@v2.2
+        id: short-sha
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      - name: Get current timestamp
+        id: timestamp
+        run: echo "now=$(date +'%s')" >> "$GITHUB_OUTPUT"
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ vars.IAM_GA_ROLE }}
+          aws-region: "us-east-1"
 
-    - name: Login to ECR
-      id: login-ecr
-      uses: docker/login-action@v1
-      with:
-        registry: public.ecr.aws
-        username: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registries: 453834546898
 
-    - name: Build and push
-      uses: docker/build-push-action@v2
-      with:
-        context: ./store-frontend
-        file: ./store-frontend/storefront-versions/store-frontend-instrumented-fixed/Dockerfile
-        platforms: linux/amd64
-        push: true
-        tags: ${{ secrets.PUBLIC_ECR_REGISTRY }}/ddtraining/storefront-fixed:latest
-
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          AWS_ACCOUNT: 453834546898
+          ECR_REPOSITORY: storefront
+          ECR_REGION: us-east-1
+          IMAGE_TAG: "${{ steps.timestamp.outputs.now }}-${{ steps.short-sha.outputs.sha }}"
+        run: |
+          docker build -t "$ECR_REPOSITORY:$IMAGE_TAG" -f storefront-versions/store-frontend-instrumented-fixed/Dockerfile .
+          docker tag "$ECR_REPOSITORY:$IMAGE_TAG" "$AWS_ACCOUNT.dkr.ecr.$ECR_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker push "$AWS_ACCOUNT.dkr.ecr.$ECR_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG"
