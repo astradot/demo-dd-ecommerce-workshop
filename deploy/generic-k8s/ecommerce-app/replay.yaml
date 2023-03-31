@@ -41,7 +41,7 @@ spec:
               value: "frontend.datadog-demo"
             - name: FRONTEND_PORT
               value: "80"
-          image: 453834546898.dkr.ecr.us-east-1.amazonaws.com/traffic-replay:1679948071-c89dbd3
+          image: 453834546898.dkr.ecr.us-east-1.amazonaws.com/traffic-replay:1680301802-014116a
           imagePullPolicy: Always
           name: ecommerce-traffic-replay
           resources:
