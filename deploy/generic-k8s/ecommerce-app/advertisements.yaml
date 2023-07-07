@@ -75,19 +75,19 @@ spec:
             limits:
               cpu: 100m
               memory: 300Mi
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  labels:
-#    tags.datadoghq.com/service: advertisements
-#    app: ecommerce
-#  name: advertisements
-#spec:
-#  ports:
-#    - port: 5002
-#      protocol: TCP
-#      targetPort: 5002
-#  selector:
-#    tags.datadoghq.com/service: advertisements
-#    app: ecommerce
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    tags.datadoghq.com/service: advertisements
+    app: ecommerce
+  name: advertisements
+spec:
+  ports:
+    - port: 5002
+      protocol: TCP
+      targetPort: 5002
+  selector:
+    tags.datadoghq.com/service: advertisements
+    app: ecommerce

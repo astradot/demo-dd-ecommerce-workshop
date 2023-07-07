@@ -75,21 +75,21 @@ spec:
             limits:
               cpu: 100m
               memory: 300Mi
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  labels:
-#    tags.datadoghq.com/service: discounts
-#    app: ecommerce
-#  name: discounts
-#spec:
-#  ports:
-#    - port: 5001
-#      protocol: TCP
-#      targetPort: 5001
-#  selector:
-#    tags.datadoghq.com/service: discounts
-#    app: ecommerce
-#  sessionAffinity: None
-#  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    tags.datadoghq.com/service: discounts
+    app: ecommerce
+  name: discounts
+spec:
+  ports:
+    - port: 5001
+      protocol: TCP
+      targetPort: 5001
+  selector:
+    tags.datadoghq.com/service: discounts
+    app: ecommerce
+  sessionAffinity: None
+  type: ClusterIP
