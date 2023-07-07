@@ -1,107 +1,107 @@
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app: ecommerce
-    tags.datadoghq.com/service: storefront
-  name: frontend
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      tags.datadoghq.com/service: storefront
-      app: ecommerce
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      labels:
-        tags.datadoghq.com/service: storefront
-        app: ecommerce
-    spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/arch
-                    operator: In
-                    values:
-                      - amd64
-      volumes:
-        - name: apmsocketpath
-          hostPath:
-            path: /var/run/datadog/
-      containers:
-        - image: 453834546898.dkr.ecr.us-east-1.amazonaws.com/storefront:1680300382-958f931
-          name: ecommerce-spree-observability
-          volumeMounts:
-            - name: apmsocketpath
-              mountPath: /var/run/datadog
-          command:
-            - sh
-          args:
-            - docker-entrypoint.sh
-          env:
-            - name: DB_USERNAME
-              value: user
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: pw
-                  name: db-password
-            # - name: DD_TRACE_AGENT_URL
-            #   value: unix:///var/run/datadog/apm.socket
-            - name: DD_LOGS_INJECTION
-              value: "true"
-            - name: DD_ANALYTICS_ENABLED
-              value: "true"
-            - name: DD_CLIENT_TOKEN
-              value: pubba70ce93dbc87e089b70827a71316c1f
-            - name: DD_APPLICATION_ID
-              value: "f0a8265c-6142-4a3d-b407-12a8f0220c4d"
-            - name: DISCOUNTS_ROUTE
-              value: "http://discounts.datadog-demo"
-            - name: DISCOUNTS_PORT
-              value: "5001"
-            - name: ADS_ROUTE
-              value: "http://advertisements.datadog-demo"
-            - name: ADS_PORT
-              value: "5002"
-            - name: DD_SERVICE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['tags.datadoghq.com/service']
-          ports:
-            - containerPort: 3000
-          resources:
-            requests:
-              cpu: 200m
-              memory: 500Mi
-            limits:
-              cpu: 200m
-              memory: 500Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    tags.datadoghq.com/service: storefront
-    app: ecommerce
-  name: frontend
-spec:
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: 3000
-      name: http
-  selector:
-    tags.datadoghq.com/service: storefront
-    app: ecommerce
-  # Change this value to LoadBalancer for better public ingress routing to this
-  # pod on most k8s platforms.
-  type: ClusterIP
+#---
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  labels:
+#    app: ecommerce
+#    tags.datadoghq.com/service: storefront
+#  name: frontend
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      tags.datadoghq.com/service: storefront
+#      app: ecommerce
+#  strategy:
+#    rollingUpdate:
+#      maxSurge: 25%
+#      maxUnavailable: 25%
+#    type: RollingUpdate
+#  template:
+#    metadata:
+#      labels:
+#        tags.datadoghq.com/service: storefront
+#        app: ecommerce
+#    spec:
+#      affinity:
+#        nodeAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#            nodeSelectorTerms:
+#              - matchExpressions:
+#                  - key: kubernetes.io/arch
+#                    operator: In
+#                    values:
+#                      - amd64
+#      volumes:
+#        - name: apmsocketpath
+#          hostPath:
+#            path: /var/run/datadog/
+#      containers:
+#        - image: 453834546898.dkr.ecr.us-east-1.amazonaws.com/storefront:1680300382-958f931
+#          name: ecommerce-spree-observability
+#          volumeMounts:
+#            - name: apmsocketpath
+#              mountPath: /var/run/datadog
+#          command:
+#            - sh
+#          args:
+#            - docker-entrypoint.sh
+#          env:
+#            - name: DB_USERNAME
+#              value: user
+#            - name: DB_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  key: pw
+#                  name: db-password
+#            # - name: DD_TRACE_AGENT_URL
+#            #   value: unix:///var/run/datadog/apm.socket
+#            - name: DD_LOGS_INJECTION
+#              value: "true"
+#            - name: DD_ANALYTICS_ENABLED
+#              value: "true"
+#            - name: DD_CLIENT_TOKEN
+#              value: pubba70ce93dbc87e089b70827a71316c1f
+#            - name: DD_APPLICATION_ID
+#              value: "f0a8265c-6142-4a3d-b407-12a8f0220c4d"
+#            - name: DISCOUNTS_ROUTE
+#              value: "http://discounts.datadog-demo"
+#            - name: DISCOUNTS_PORT
+#              value: "5001"
+#            - name: ADS_ROUTE
+#              value: "http://advertisements.datadog-demo"
+#            - name: ADS_PORT
+#              value: "5002"
+#            - name: DD_SERVICE
+#              valueFrom:
+#                fieldRef:
+#                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+#          ports:
+#            - containerPort: 3000
+#          resources:
+#            requests:
+#              cpu: 200m
+#              memory: 500Mi
+#            limits:
+#              cpu: 200m
+#              memory: 500Mi
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  labels:
+#    tags.datadoghq.com/service: storefront
+#    app: ecommerce
+#  name: frontend
+#spec:
+#  ports:
+#    - port: 80
+#      protocol: TCP
+#      targetPort: 3000
+#      name: http
+#  selector:
+#    tags.datadoghq.com/service: storefront
+#    app: ecommerce
+#  # Change this value to LoadBalancer for better public ingress routing to this
+#  # pod on most k8s platforms.
+#  type: ClusterIP
