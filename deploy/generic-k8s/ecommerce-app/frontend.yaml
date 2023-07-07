@@ -5,14 +5,12 @@ metadata:
   labels:
     app: ecommerce
     tags.datadoghq.com/service: storefront
-    tags.datadoghq.com/env: "development"
   name: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
       tags.datadoghq.com/service: storefront
-      tags.datadoghq.com/env: "development"
       app: ecommerce
   strategy:
     rollingUpdate:
@@ -23,7 +21,6 @@ spec:
     metadata:
       labels:
         tags.datadoghq.com/service: storefront
-        tags.datadoghq.com/env: "development"
         app: ecommerce
     spec:
       affinity:
@@ -75,10 +72,6 @@ spec:
               value: "http://advertisements.datadog-demo"
             - name: ADS_PORT
               value: "5002"
-            - name: DD_ENV
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['tags.datadoghq.com/env']
             - name: DD_SERVICE
               valueFrom:
                 fieldRef:
@@ -98,7 +91,6 @@ kind: Service
 metadata:
   labels:
     tags.datadoghq.com/service: storefront
-    tags.datadoghq.com/env: development
     app: ecommerce
   name: frontend
 spec:
@@ -109,7 +101,6 @@ spec:
       name: http
   selector:
     tags.datadoghq.com/service: storefront
-    tags.datadoghq.com/env: development
     app: ecommerce
   # Change this value to LoadBalancer for better public ingress routing to this
   # pod on most k8s platforms.
