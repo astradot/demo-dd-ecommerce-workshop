@@ -8,6 +8,9 @@ module Spree
     respond_to :html
 
     def index
+      current_span = Datadog::Tracing.active_span
+      current_span.set_tag('userid', 'a') unless current_span.nil?
+
       @searcher = build_searcher(params.merge(include_images: true))
       @products = @searcher.retrieve_products
       @products = @products.includes(:possible_promotions) if @products.respond_to?(:includes)
@@ -15,6 +18,9 @@ module Spree
     end
 
     def show
+      current_span = Datadog::Tracing.active_span
+      current_span.set_tag('userid', 'a') unless current_span.nil?
+
       @variants = @product.variants_including_master.
                   spree_base_scopes.
                   active(current_currency).
