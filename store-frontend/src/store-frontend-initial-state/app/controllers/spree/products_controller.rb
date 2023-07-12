@@ -10,7 +10,7 @@ module Spree
     respond_to :html
 
     def index
-      current_span = Datadog::Tracing.active_span
+      current_span = ::Datadog::Tracing.active_span
       current_span.set_tag('userid', 'a') unless current_span.nil?
 
       @searcher = build_searcher(params.merge(include_images: true))
@@ -20,7 +20,7 @@ module Spree
     end
 
     def show
-      current_span = Datadog::Tracing.active_span
+      current_span = ::Datadog::Tracing.active_span
       current_span.set_tag('userid', 'a') unless current_span.nil?
 
       @variants = @product.variants_including_master.
