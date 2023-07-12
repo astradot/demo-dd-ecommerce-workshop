@@ -37,7 +37,7 @@ spec:
           hostPath:
             path: /var/run/datadog/
       containers:
-        - image: 453834546898.dkr.ecr.us-east-1.amazonaws.com/storefront:1680300382-958f931
+        - image: 453834546898.dkr.ecr.us-east-1.amazonaws.com/storefront:1689197431-21134a1
           name: ecommerce-spree-observability
           volumeMounts:
             - name: apmsocketpath
