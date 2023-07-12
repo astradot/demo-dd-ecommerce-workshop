@@ -1,3 +1,5 @@
+require 'ddtrace'
+
 module Spree
   class ProductsController < Spree::StoreController
     before_action :load_product, only: :show
