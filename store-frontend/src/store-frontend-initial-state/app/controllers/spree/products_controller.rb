@@ -11,7 +11,7 @@ module Spree
 
     def index
       current_span = Datadog.tracer.active_span
-      current_span.set_tag('userid', 'a') unless current_span.nil?
+      current_span.set_tag('userid', ['a','b','c'].sample) unless current_span.nil?
 
       @searcher = build_searcher(params.merge(include_images: true))
       @products = @searcher.retrieve_products
@@ -21,7 +21,7 @@ module Spree
 
     def show
       current_span = Datadog.tracer.active_span
-      current_span.set_tag('userid', 'a') unless current_span.nil?
+      current_span.set_tag('userid', ['a','b','c'].sample) unless current_span.nil?
 
       @variants = @product.variants_including_master.
                   spree_base_scopes.
