@@ -16,22 +16,6 @@ data:
   pw: password
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: task-pv-volume
-  labels:
-    type: local
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: "/mnt/data"
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: task-pvc-volume
@@ -41,7 +25,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: manual
+  storageClassName: ebs-gp3
 ---
 apiVersion: apps/v1
 kind: Deployment
