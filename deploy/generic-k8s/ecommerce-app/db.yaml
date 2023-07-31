@@ -22,7 +22,7 @@ metadata:
   labels:
     type: local
 spec:
-  storageClassName: manual
+  storageClassName: ebs-gp3
   capacity:
     storage: 5Gi
   accessModes:
@@ -41,7 +41,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: manual
+  storageClassName: ebs-gp3
 ---
 apiVersion: apps/v1
 kind: Deployment
